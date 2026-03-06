@@ -1,5 +1,6 @@
 package com.salmanmanaa.contentsearchservice.documents;
 
+import com.salmanmanaa.contentsearchservice.indexing.ElasticsearchIndexingService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,6 +15,11 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class InMemoryDocumentService implements DocumentService {
 
     private final Map<String, DocumentMetadata> documents = new ConcurrentHashMap<>();
+    private final ElasticsearchIndexingService indexingService;
+
+    public InMemoryDocumentService(ElasticsearchIndexingService indexingService) {
+        this.indexingService = indexingService;
+    }
 
     @Override
     public CreateDocumentResponse create(CreateDocumentRequest request) {
@@ -52,6 +58,37 @@ public class InMemoryDocumentService implements DocumentService {
                 metadata.content(),
                 metadata.status(),
                 metadata.createdAt()
+        );
+    }
+
+    @Override
+    public IndexDocumentResponse indexById(String id) {
+        DocumentMetadata metadata = documents.get(id);
+
+        if (metadata == null) {
+            throw new ResponseStatusException(NOT_FOUND, "Document not found");
+        }
+
+        int chunkCount = indexingService.indexDocument(
+                metadata.id(),
+                metadata.title(),
+                metadata.content()
+        );
+
+        DocumentMetadata updated = new DocumentMetadata(
+                metadata.id(),
+                metadata.title(),
+                metadata.content(),
+                DocumentStatus.INDEXED,
+                metadata.createdAt()
+        );
+
+        documents.put(id, updated);
+
+        return new IndexDocumentResponse(
+                updated.id(),
+                updated.status(),
+                chunkCount
         );
     }
 }

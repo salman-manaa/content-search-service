@@ -4,6 +4,7 @@ import com.salmanmanaa.contentsearchservice.documents.CreateDocumentRequest;
 import com.salmanmanaa.contentsearchservice.documents.CreateDocumentResponse;
 import com.salmanmanaa.contentsearchservice.documents.DocumentService;
 import com.salmanmanaa.contentsearchservice.documents.GetDocumentResponse;
+import com.salmanmanaa.contentsearchservice.documents.IndexDocumentResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -27,5 +28,10 @@ public class DocumentController {
     @GetMapping("/{id}")
     public GetDocumentResponse getById(@PathVariable String id) {
         return documentService.getById(id);
+    }
+
+    @PostMapping("/{id}/index")
+    public IndexDocumentResponse indexById(@PathVariable String id) {
+        return documentService.indexById(id);
     }
 }
