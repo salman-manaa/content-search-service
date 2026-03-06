@@ -10,6 +10,10 @@ I built this project to explore backend service design for content indexing and 
 
 Verified end-to-end by uploading and indexing a real CV PDF, then retrieving results through keyword search with Elasticsearch.
 
+## Demo
+
+![Terminal demo](docs/demo-terminal.png)
+
 ## Stack
 
 - Java 21
