@@ -31,6 +31,8 @@ public class ElasticsearchIndexingService {
             elasticsearchTemplate.save(chunkDocument);
         }
 
+        elasticsearchTemplate.indexOps(SearchChunkDocument.class).refresh();
+
         return chunks.size();
     }
 }
