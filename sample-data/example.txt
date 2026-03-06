@@ -1,0 +1,2 @@
+This is a plain text document uploaded through the API.
+It should be stored, indexed, and later found by search.

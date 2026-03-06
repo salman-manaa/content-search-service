@@ -1,14 +1,19 @@
 package com.salmanmanaa.contentsearchservice.documents;
 
+import com.salmanmanaa.contentsearchservice.common.FileValidationException;
 import com.salmanmanaa.contentsearchservice.indexing.ElasticsearchIndexingService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
@@ -23,25 +28,26 @@ public class InMemoryDocumentService implements DocumentService {
 
     @Override
     public CreateDocumentResponse create(CreateDocumentRequest request) {
-        String id = UUID.randomUUID().toString();
-        Instant createdAt = Instant.now();
+        return storeDocument(request.title(), request.content());
+    }
 
-        DocumentMetadata metadata = new DocumentMetadata(
-                id,
-                request.title(),
-                request.content(),
-                DocumentStatus.CREATED,
-                createdAt
-        );
+    @Override
+    public CreateDocumentResponse createFromTextFile(MultipartFile file) {
+        validateTextFile(file);
 
-        documents.put(id, metadata);
+        try {
+            String filename = file.getOriginalFilename() == null ? "uploaded-document.txt" : file.getOriginalFilename();
+            String title = stripTxtExtension(filename);
+            String content = new String(file.getBytes(), StandardCharsets.UTF_8).trim();
 
-        return new CreateDocumentResponse(
-                metadata.id(),
-                metadata.title(),
-                metadata.status(),
-                metadata.createdAt()
-        );
+            if (content.isBlank()) {
+                throw new FileValidationException("Uploaded file is empty");
+            }
+
+            return storeDocument(title, content);
+        } catch (IOException e) {
+            throw new ResponseStatusException(BAD_REQUEST, "Failed to read uploaded file");
+        }
     }
 
     @Override
@@ -90,5 +96,45 @@ public class InMemoryDocumentService implements DocumentService {
                 updated.status(),
                 chunkCount
         );
+    }
+
+    private CreateDocumentResponse storeDocument(String title, String content) {
+        String id = UUID.randomUUID().toString();
+        Instant createdAt = Instant.now();
+
+        DocumentMetadata metadata = new DocumentMetadata(
+                id,
+                title,
+                content,
+                DocumentStatus.CREATED,
+                createdAt
+        );
+
+        documents.put(id, metadata);
+
+        return new CreateDocumentResponse(
+                metadata.id(),
+                metadata.title(),
+                metadata.status(),
+                metadata.createdAt()
+        );
+    }
+
+    private void validateTextFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new FileValidationException("Uploaded file is empty");
+        }
+
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".txt")) {
+            throw new FileValidationException("Only .txt files are supported");
+        }
+    }
+
+    private String stripTxtExtension(String filename) {
+        if (filename.toLowerCase().endsWith(".txt")) {
+            return filename.substring(0, filename.length() - 4);
+        }
+        return filename;
     }
 }

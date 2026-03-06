@@ -19,6 +19,7 @@ I built this project to explore backend service design for content indexing and 
 ## Features
 
 - Create documents through a REST API
+- Upload TXT documents through a multipart API
 - Retrieve documents by ID
 - Chunk and index document content into Elasticsearch
 - Run keyword search over indexed chunks
@@ -32,6 +33,7 @@ I built this project to explore backend service design for content indexing and 
 
 ### Documents
 - `POST /api/documents`
+- `POST /api/documents/upload`
 - `GET /api/documents/{id}`
 - `POST /api/documents/{id}/index`
 
@@ -65,6 +67,12 @@ curl -X POST http://localhost:8080/api/documents \
     "title": "Index Test",
     "content": "This is a test document that will be indexed and searched."
   }'
+```
+
+### Upload a TXT document
+```bash
+curl -X POST http://localhost:8080/api/documents/upload \
+  -F "file=@sample-data/example.txt"
 ```
 
 ### Get a document by ID
@@ -128,7 +136,7 @@ Run tests with:
 
 ## Future improvements
 
-- File upload support for TXT and PDF documents
+- File upload support for PDF documents
 - Text extraction pipeline
 - Semantic search
 - Persistent metadata storage
