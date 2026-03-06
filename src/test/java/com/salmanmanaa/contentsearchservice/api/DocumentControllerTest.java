@@ -7,10 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,6 +42,35 @@ class DocumentControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.title", is("Test Document")))
                 .andExpect(jsonPath("$.status", is("CREATED")));
+    }
+
+    @Test
+    void uploadTxtDocumentReturns201() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "example.txt",
+                "text/plain",
+                "Uploaded text content".getBytes()
+        );
+
+        mockMvc.perform(multipart("/api/documents/upload").file(file))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.title", is("example")))
+                .andExpect(jsonPath("$.status", is("CREATED")));
+    }
+
+    @Test
+    void uploadInvalidFileTypeReturns400() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "bad.json",
+                "application/json",
+                "{\"hello\":\"world\"}".getBytes()
+        );
+
+        mockMvc.perform(multipart("/api/documents/upload").file(file))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Only .txt files are supported")));
     }
 
     @Test
