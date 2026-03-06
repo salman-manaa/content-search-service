@@ -9,6 +9,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,6 +50,19 @@ public class InMemoryDocumentService implements DocumentService {
         } catch (IOException e) {
             throw new ResponseStatusException(BAD_REQUEST, "Failed to read uploaded file");
         }
+    }
+
+    @Override
+    public List<ListDocumentResponse> listAll() {
+        return documents.values().stream()
+                .sorted(Comparator.comparing(DocumentMetadata::createdAt).reversed())
+                .map(document -> new ListDocumentResponse(
+                        document.id(),
+                        document.title(),
+                        document.status(),
+                        document.createdAt()
+                ))
+                .toList();
     }
 
     @Override
