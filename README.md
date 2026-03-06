@@ -82,6 +82,31 @@ curl -X POST http://localhost:8080/api/documents/<DOCUMENT_ID>/index
 curl "http://localhost:8080/api/search?q=indexed"
 ```
 
+## Sample responses
+
+### Create document response
+```json
+{
+  "id": "92e824a7-a85b-43b5-848b-1409417b24a5",
+  "title": "Index Test",
+  "status": "CREATED",
+  "createdAt": "2026-03-06T00:00:53.032132Z"
+}
+```
+
+### Search response
+```json
+[
+  {
+    "documentId": "92e824a7-a85b-43b5-848b-1409417b24a5",
+    "title": "Index Test",
+    "chunkIndex": 0,
+    "content": "This is a longer test document. It should be split into chunks and indexed into Elasticsearch so that later we can search through it.",
+    "score": 0.2876821
+  }
+]
+```
+
 ## Architecture
 
 ```text
