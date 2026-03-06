@@ -6,6 +6,10 @@ A Spring Boot backend service for document ingestion, chunking, indexing, and ke
 
 I built this project to explore backend service design for content indexing and search, with a focus on clean REST APIs, local developer setup, and production-style search workflows.
 
+## Demo note
+
+Verified end-to-end by uploading and indexing a real CV PDF, then retrieving results through keyword search with Elasticsearch.
+
 ## Stack
 
 - Java 21
@@ -19,7 +23,8 @@ I built this project to explore backend service design for content indexing and 
 ## Features
 
 - Create documents through a REST API
-- Upload TXT documents through a multipart API
+- Upload TXT and PDF documents through a multipart API
+- Extract text from uploaded PDF documents
 - Retrieve documents by ID
 - Chunk and index document content into Elasticsearch
 - Run keyword search over indexed chunks
@@ -34,6 +39,7 @@ I built this project to explore backend service design for content indexing and 
 ### Documents
 - `POST /api/documents`
 - `POST /api/documents/upload`
+- `GET /api/documents`
 - `GET /api/documents/{id}`
 - `POST /api/documents/{id}/index`
 
@@ -73,6 +79,12 @@ curl -X POST http://localhost:8080/api/documents \
 ```bash
 curl -X POST http://localhost:8080/api/documents/upload \
   -F "file=@sample-data/example.txt"
+```
+
+### Upload a PDF document
+```bash
+curl -X POST http://localhost:8080/api/documents/upload \
+  -F "file=@$HOME/Downloads/Salman_Manaa_CV_Adobe.pdf"
 ```
 
 ### Get a document by ID
@@ -136,8 +148,8 @@ Run tests with:
 
 ## Future improvements
 
-- File upload support for PDF documents
-- Text extraction pipeline
+- Better PDF extraction quality and formatting preservation
+- Support additional file formats
 - Semantic search
 - Persistent metadata storage
 - Search snippets and highlighting

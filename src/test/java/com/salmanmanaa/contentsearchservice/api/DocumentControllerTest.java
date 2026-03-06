@@ -70,7 +70,7 @@ class DocumentControllerTest {
 
         mockMvc.perform(multipart("/api/documents/upload").file(file))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", is("Only .txt files are supported")));
+                .andExpect(jsonPath("$.message", is("Only .txt and .pdf files are supported")));
     }
 
     @Test
